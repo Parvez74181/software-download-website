@@ -1,0 +1,184 @@
+---
+import prisma from "../../../lib/prisma";
+import { Image } from "@astrojs/image/components";
+import Layout from "../../layouts/Layout.astro";
+import Description from "../../components/Description.jsx";
+const { slug, id } = Astro.params;
+
+let software: any;
+
+try {
+  software = await prisma.software.findFirst({
+    where: {
+      slug,
+      UID: id,
+    },
+  });
+  console.log(software);
+} catch (e) {
+  console.log(e);
+} finally {
+  await prisma.$disconnect();
+}
+---
+
+<Layout
+  title={software?.title}
+  description={software?.metaDescription}
+  image={software?.thumbnail}
+  tags={software?.postTags}
+  createdAt={software?.createdAt}
+>
+  <main
+    id="slug-main"
+    class="slug-main min-h-screen w-[90%] md:w-[80%] mx-auto bg-white"
+  >
+    <div
+      class="w-full bg-lime-100 h-36 my-5 flex justify-center items-center p-5 rounded-md"
+    >
+      <!-- img container -->
+      <div class="logo w-[70%]">
+        <Image
+          src={software?.thumbnail}
+          alt={software?.title}
+          format="webp"
+          class="w-4/5 md:w-5/12 rounded"
+          height={150}
+          width={450}
+        />
+      </div>
+
+      <!-- download btn -->
+      <div class="download-btn-div w-[30%] flex flex-col justify-between gap-5">
+        <div class="company">
+          <h1 class="font-bold text-xl">Company Name</h1>
+          <span class="text-sm">{software?.companyName}</span>
+        </div>
+
+        <a href={software?.downloadLink}>
+          <button
+            id="download-btn"
+            class="w-full rounded-md p-3 bg-green-600 hover:bg-green-500 font-bold tracking-wider text-white flex justify-center items-center gap-10"
+          >
+            <img
+              src="/download-arrow.png"
+              alt="download arrow"
+              loading="lazy"
+              decoding="async"
+              class="h-7 object-contain invert"
+            />
+            Download Software
+          </button>
+        </a>
+      </div>
+    </div>
+
+    {/* description */}
+    <Description description={software?.description} client:visible />
+  </main>
+</Layout>
+
+<style lang="scss">
+  .download-btn-div {
+    position: relative;
+    &::before {
+      content: "";
+      position: absolute;
+      width: 5px;
+      height: 100%;
+      left: -20px;
+      border-radius: 25px;
+      background: var(--secondary-color);
+    }
+  }
+  .slug-main {
+    font-family: "Gothic A1", sans-serif !important;
+  }
+
+  .category,
+  .categories-heading {
+    color: #eeeeee;
+    font-family: "Gothic A1" !important;
+    font-style: normal;
+    font-weight: 800;
+    line-height: normal;
+  }
+
+  .categories {
+    li {
+      list-style: none;
+      padding-top: 10px;
+      padding-left: 10px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #e0e0e0;
+      position: relative;
+      &::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: #e0e0e0;
+      }
+    }
+  }
+</style>
+
+<script defer>
+  const searchInputBox = document.querySelector("#search-input");
+  const searchIconBox = document.querySelector("#search-icon");
+  const shareIcon = document.querySelector("#share-icon");
+
+  searchInputBox.addEventListener("keyup", (e) => {
+    searchHandler(e);
+  });
+  searchIconBox.addEventListener("click", (e) => {
+    searchHandler(e);
+  });
+
+  //   searchHandler
+  const searchHandler = (e) => {
+    if (e.keyCode === 13 || e.key === "Enter") {
+      let searchText = e.target.value.trim().toLowerCase();
+      if (searchText) router.push(`/software/search/${searchText}`);
+    } else if (e.type === "click") {
+      let parentNodeItem = e.target.parentNode.parentNode;
+      let searchInput = parentNodeItem.querySelector("#search");
+
+      searchInput = searchInput?.value?.trim().toLowerCase();
+      if (searchInput) router.push(`/software/search/${searchInput}`);
+    }
+  };
+
+  const shareBtn = async (title, text) => {
+    const shareData = {
+      title,
+      text,
+      url: location.href,
+    };
+    // if navigator.share do support then share with navigator.share else copy the input text url and give a msg 'link copied!'. afater 2s remove the msg and the selection of url container
+    console.log(navigator.share);
+
+    if (typeof navigator !== "undefined" && navigator.share)
+      await navigator.share(shareData);
+    else {
+      let txt = document.querySelector(".share-box .link-copy-txt");
+      let urlInput = document.querySelector("#url-input");
+
+      urlInput.select();
+      document.execCommand("copy");
+      txt.innerHTML = "Link Copied!";
+
+      setTimeout(() => {
+        txt.innerHTML = "";
+        urlInput.setSelectionRange(0, 0); // this means deselect
+      }, 2000);
+    }
+  };
+
+  shareIcon.addEventListener("click", (e) => {
+    shareBtn(e.target.dataset.title, e.target.dataset.desc);
+  });
+</script>
