@@ -27,3 +27,11 @@ model Software {
   downloadLink    String   @default("") @db.Text
   companyName     String   @default("") @db.Text
 }
+
+model Softwarecategories {
+  id        Int      @id @default(autoincrement())
+  UID       String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String   @db.Text
+}
