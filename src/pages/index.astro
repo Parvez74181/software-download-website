@@ -1,7 +1,6 @@
 ---
 import { Image } from "@astrojs/image/components";
-import exploreSvg from "../../public/explore-bg-svg.svg";
-import searchIconSvg from "../../public/search-icon.svg";
+import Button from "../components/Button.astro";
 import Card from "../components/Card.astro";
 import Loader from "../components/Loader.astro";
 import prisma from "../../lib/prisma";
@@ -18,12 +17,20 @@ interface Blogs {
   createdAt: any;
 }
 
-let blogs: Blogs[];
-const page = Number(Astro.url.searchParams.get("page")) || 1;
+let windowsBlogs: Blogs[];
+let macBlogs: Blogs[];
+let iosBlogs: Blogs[];
+let androidBlogs: Blogs[];
+
 const pageSize = 20;
+const page = 1;
+let totalWindowsBlogs: number;
+let totalMacBlogs: number;
+let totalAndroidBlogs: number;
+let totalIosBlogs: number;
 
 try {
-  blogs = await prisma.software.findMany({
+  windowsBlogs = await prisma.software.findMany({
     orderBy: {
       createdAt: "desc",
     },
@@ -35,62 +42,125 @@ try {
       UID: true,
       createdAt: true,
     },
+    where: {
+      category: {
+        equals: "windows",
+      },
+    },
     skip: ((page || 1) - 1) * pageSize, // Calculate the number of items to skip. ex: page is 2 then 2-1 = 1 and finallay pageSize is show many items do I want to show, so 1*pageSize = 1*12 = 12 to skip
     take: pageSize, // Define the number of items to take per page
   });
+
+  macBlogs = await prisma.software.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+    select: {
+      thumbnail: true,
+      title: true,
+      slug: true,
+      category: true,
+      UID: true,
+      createdAt: true,
+    },
+    where: {
+      category: {
+        equals: "mac",
+      },
+    },
+    skip: ((page || 1) - 1) * pageSize, // Calculate the number of items to skip. ex: page is 2 then 2-1 = 1 and finallay pageSize is show many items do I want to show, so 1*pageSize = 1*12 = 12 to skip
+    take: pageSize, // Define the number of items to take per page
+  });
+
+  iosBlogs = await prisma.software.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+    select: {
+      thumbnail: true,
+      title: true,
+      slug: true,
+      category: true,
+      UID: true,
+      createdAt: true,
+    },
+    where: {
+      category: {
+        equals: "ios",
+      },
+    },
+    skip: ((page || 1) - 1) * pageSize, // Calculate the number of items to skip. ex: page is 2 then 2-1 = 1 and finallay pageSize is show many items do I want to show, so 1*pageSize = 1*12 = 12 to skip
+    take: pageSize, // Define the number of items to take per page
+  });
+
+  androidBlogs = await prisma.software.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+    select: {
+      thumbnail: true,
+      title: true,
+      slug: true,
+      category: true,
+      UID: true,
+      createdAt: true,
+    },
+    where: {
+      category: {
+        equals: "android",
+      },
+    },
+    skip: ((page || 1) - 1) * pageSize, // Calculate the number of items to skip. ex: page is 2 then 2-1 = 1 and finallay pageSize is show many items do I want to show, so 1*pageSize = 1*12 = 12 to skip
+    take: pageSize, // Define the number of items to take per page
+  });
+
+  // totalWindowsBlogs = await prisma.software.count({
+  //   where: {
+  //     category: {
+  //       equals: "windows",
+  //     },
+  //   },
+  // });
+
+  // totalMacBlogs = await prisma.software.count({
+  //   where: {
+  //     category: {
+  //       equals: "mac",
+  //     },
+  //   },
+  // });
+
+  // totalAndroidBlogs = await prisma.software.count({
+  //   where: {
+  //     category: {
+  //       equals: "android",
+  //     },
+  //   },
+  // });
+
+  // totalIosBlogs = await prisma.software.count({
+  //   where: {
+  //     category: {
+  //       equals: "ios",
+  //     },
+  //   },
+  // });
 } catch (e) {
   console.log(e);
 } finally {
   await prisma.$disconnect();
 }
-
-let totalBlogs: Number = await prisma.software.count();
-
-const pageCount = Math.ceil(Number(totalBlogs) / pageSize);
-
-let paginationItems: String[] = [];
-
-// insert prev icon
-paginationItems.push(
-  `<li ><a class="cursor-pointer flex justify-center items-center w-9 h-9 ${
-    page <= 1 && "opacity-50 cursor-default select-none"
-  }" id='pagination-item' ${page > 1 && `href=/explore?page=${page - 1}`}>
-    <img  src="/dropdown-icon.png" title="prev" height={20} width={20} loading='lazy' class="rotate-90" decoding='async' alt="prev button"/></a></li>`
-);
-
-for (let i = page - 3; i <= page + 3; i++) {
-  // if i is negative number then continue the for loop
-  if (i < 1) continue;
-  else if (i > pageCount) break; // if i is greater then pageCount then break the for loop
-
-  paginationItems.push(
-    ` <li ><a class="cursor-pointer flex justify-center items-center w-9 h-9 rounded-full hover:bg-blue-500 hover:text-white hover:shadow-lg ${
-      i === page && "bg-blue-500 text-white current"
-    }" id='pagination-item' href='/explore?page=${i}'>${i}</a></li>`
-  );
-}
-
-// insert next icon
-paginationItems.push(
-  `<li ><a class="cursor-pointer flex justify-center items-center w-9 h-9  ${
-    page >= pageCount && "opacity-50 cursor-default select-none"
-  }" id='pagination-item' ${
-    page < pageCount && `href=/explore?page=${page + 1}`
-  }> <img  src="/dropdown-icon.png" title="prev" height={20} width={20} loading='lazy' class="-rotate-90" decoding='async' alt="prev button"/></a></li>`
-);
 ---
 
 <Layout title=" Explore New Horizons on our Explore Page! | Explore | 10mBlogs">
   <main class={`min-h-screen`}>
-    <section>
-      {/* blogs */}
-
+    <!-- windows section -->
+    <section id="windows">
       <div class="mx-auto mt-5 w-[80%] md:w-[90%]">
         <h1
-          id="all-post-title"
-          class="ms-2 md:ms-20 text-3xl md:text-5xl max-h-[70px]"
+          class="ms-2 md:ms-20 text-2xl md:text-3xl w-[115px] md:w-[150px] post-category-title"
         >
-          All Posts
+          WINDOWS
         </h1>
       </div>
 
@@ -103,27 +173,145 @@ paginationItems.push(
               <Loader />
             </div>
           ) : (
-            blogs?.map((post) => <Card postData={post} />)
+            windowsBlogs?.map((post) => <Card postData={post} />)
           )
         }
       </div>
+      {
+        windowsBlogs.length == pageSize && (
+          <a
+            href="/category?category=windows&page=2"
+            class="w-[90%] md:w-[50%] mx-auto relative block"
+          >
+            <Button text={"SEE ALL"} />
+          </a>
+        )
+      }
     </section>
 
-    <!-- pagination -->
-    <div
-      id="pagination"
-      class="pagination w-full flex justify-center items-center px-20 my-10"
-    >
-      <ul
-        class="flex gap-5 items-center pagination-ul"
-        data-pagecount={pageCount}
-        set:html={paginationItems}
-      />
-    </div>
+    <!-- mac section -->
+    <section id="mac">
+      <div class="mx-auto mt-5 w-[80%] md:w-[90%]">
+        <h1
+          class="ms-2 md:ms-20 text-2xl md:text-3xl w-[50px] md:w-[65px] post-category-title"
+        >
+          MAC
+        </h1>
+      </div>
+
+      <div
+        class="content flex flex-wrap justify-center items-center my-10 mx-auto gap-8 w-[90%]"
+      >
+        {
+          loading ? (
+            <div>
+              <Loader />
+            </div>
+          ) : (
+            macBlogs?.map((post) => <Card postData={post} />)
+          )
+        }
+      </div>
+      {
+        macBlogs.length == pageSize && (
+          <a
+            href="/category?category=mac&page=2"
+            class="w-[90%] md:w-[50%] mx-auto relative block"
+          >
+            <Button text={"SEE ALL"} />
+          </a>
+        )
+      }
+    </section>
+
+    <!-- ios section -->
+    <section id="ios">
+      <div class="mx-auto mt-5 w-[80%] md:w-[90%]">
+        <h1
+          class="ms-2 md:ms-20 text-2xl md:text-3xl w-[40px] md:w-[50px] post-category-title"
+        >
+          IOS
+        </h1>
+      </div>
+
+      <div
+        class="content flex flex-wrap justify-center items-center my-10 mx-auto gap-8 w-[90%]"
+      >
+        {
+          loading ? (
+            <div>
+              <Loader />
+            </div>
+          ) : (
+            iosBlogs?.map((post) => <Card postData={post} />)
+          )
+        }
+      </div>
+      {
+        iosBlogs.length == pageSize && (
+          <a
+            href="/category?category=ios&page=2"
+            class="w-[90%] md:w-[50%] mx-auto relative block"
+          >
+            <Button text={"SEE ALL"} />
+          </a>
+        )
+      }
+    </section>
+
+    <!-- android section -->
+    <section id="android">
+      <div class="mx-auto mt-5 w-[80%] md:w-[90%]">
+        <h1
+          class="ms-2 md:ms-20 text-2xl md:text-3xl w-[100px] md:w-[135px] post-category-title"
+        >
+          ANDROID
+        </h1>
+      </div>
+
+      <div
+        class="content flex flex-wrap justify-center items-center my-10 mx-auto gap-8 w-[90%]"
+      >
+        {
+          loading ? (
+            <div>
+              <Loader />
+            </div>
+          ) : (
+            androidBlogs?.map((post) => <Card postData={post} />)
+          )
+        }
+      </div>
+      {
+        androidBlogs.length == pageSize && (
+          <a
+            href="/category?category=android&page=2"
+            class="w-[90%] md:w-[50%] mx-auto relative block"
+          >
+            <Button text={"SEE ALL"} />
+          </a>
+        )
+      }
+    </section>
   </main>
 </Layout>
 
 <style lang="scss">
+  .post-category-title {
+    opacity: 0.9;
+    position: relative;
+    &::after {
+      content: "";
+      position: absolute;
+      opacity: 0.9;
+      bottom: -5px;
+      left: 0;
+      width: 100%;
+      border-radius: 10px;
+      height: 2px;
+      background: #000;
+    }
+  }
   .heading-paragraph,
   .hero-section-heading {
     font-family: Gothic A1 !important;

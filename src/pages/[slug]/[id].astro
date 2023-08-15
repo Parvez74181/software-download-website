@@ -14,7 +14,6 @@ try {
       UID: id,
     },
   });
-  console.log(software);
 } catch (e) {
   console.log(e);
 } finally {
@@ -34,15 +33,14 @@ try {
     class="slug-main min-h-screen w-[90%] md:w-[80%] mx-auto bg-white"
   >
     <div
-      class="w-full bg-lime-100 h-36 my-5 flex justify-center items-center p-5 rounded-md"
+      class="w-full bg-green-100 h-36 my-5 flex justify-center items-center p-5 rounded-md"
     >
       <!-- img container -->
       <div class="logo w-[70%]">
-        <Image
+        <img
           src={software?.thumbnail}
           alt={software?.title}
-          format="webp"
-          class="w-4/5 md:w-5/12 rounded"
+          class="w-4/5 md:w-5/12 h-32 rounded object-contain"
           height={150}
           width={450}
         />

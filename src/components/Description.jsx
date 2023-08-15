@@ -31,7 +31,7 @@ const Description = ({ description }) => {
   return (
     <div
       id="desc-full"
-      className="desc-full my-5 mt-0 font-normal tracking-wider leading-8 text-gray-700"
+      className="desc-full my-5 mt-0 font-normal tracking-wider leading-8 text-gray-700 md:w-3/4"
     >
       {parse(description)}
     </div>

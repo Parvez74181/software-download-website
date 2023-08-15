@@ -2,11 +2,10 @@
 const { text }: typeof Astro.props = Astro.props;
 ---
 
-<button class="btn">{text}</button>
+<button class="btn mx-auto w-full">{text}</button>
 
 <style lang="scss">
   .btn {
-    display: inline-block;
     transition: all 0.2s ease-in;
     position: relative;
     overflow: hidden;
@@ -17,7 +16,6 @@ const { text }: typeof Astro.props = Astro.props;
     border-radius: 0.5em;
     background: #ffffff;
     border: 2px solid var(--secondary-color);
-    color: var(--secondary-color);
 
     // box-shadow: 6px 6px 12px #dadada, -6px -6px 12px #ffffff;
   }
