@@ -10,7 +10,7 @@ const { thumbnail, title, slug, category, UID }: typeof Astro.props =
   {/* thumbnail image */}
   <div class="w-full relaive px-3 pt-3 md:p-3">
     <a href={`/${slug}/${UID}`} class="w-1/3">
-      <Image
+      <img
         class={`rounded-md object-contain`}
         src={thumbnail.includes("drive.google.com")
           ? `https://drive.google.com/uc?export=view&id=${
@@ -18,9 +18,10 @@ const { thumbnail, title, slug, category, UID }: typeof Astro.props =
             }`
           : thumbnail}
         alt={slug}
-        format="webp"
-        width={500}
-        height={200}
+        width={480}
+        height={250}
+        loading="lazy"
+        decoding="async"
         style={{ width: "100%", height: "100px" }}
       />
     </a>
